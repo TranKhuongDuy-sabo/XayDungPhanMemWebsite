@@ -160,3 +160,4 @@ C:\Bo\XD PM Web\TechStoreApi\obj\Release\net9.0\refint\TechStoreApi.dll
 C:\Bo\XD PM Web\TechStoreApi\obj\Release\net9.0\TechStoreApi.pdb
 C:\Bo\XD PM Web\TechStoreApi\obj\Release\net9.0\TechStoreApi.genruntimeconfig.cache
 C:\Bo\XD PM Web\TechStoreApi\obj\Release\net9.0\ref\TechStoreApi.dll
+C:\Bo\XD PM Web\TechStoreApi\obj\Release\net9.0\TechStoreApi.sourcelink.json
