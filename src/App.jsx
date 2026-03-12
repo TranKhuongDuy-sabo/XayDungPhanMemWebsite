@@ -1,23 +1,39 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate ,useLocation } from 'react-router-dom';
 import './index.css';
 
 // ==========================================
 // 1. THANH MENU CHUYỂN TRANG
 // ==========================================
 function NavBar() {
+  const location = useLocation(); // Bắt lấy đường dẫn hiện tại trên trình duyệt
+  
+  // Logic kiểm tra: Nếu đường dẫn có chứa chữ /users hoặc là trang chủ (/)
+  const isUsersActive = location.pathname.includes('/users') || location.pathname === '/';
+  // Nếu đường dẫn có chứa chữ /products
+  const isProductsActive = location.pathname.includes('/products');
+
   return (
     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
-      <Link to="/users" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+      <Link 
+        to="/users" 
+        // Đổi màu linh hoạt: Active thì dùng màu xanh (primary), không thì màu xám (secondary)
+        className={`btn ${isUsersActive ? 'btn-primary' : 'btn-secondary'}`} 
+        style={{ textDecoration: 'none', transition: 'all 0.3s ease' }}
+      >
         👥 Quản lý Users (Nộp bài)
       </Link>
-      <Link to="/products" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+      
+      <Link 
+        to="/products" 
+        className={`btn ${isProductsActive ? 'btn-primary' : 'btn-secondary'}`} 
+        style={{ textDecoration: 'none', transition: 'all 0.3s ease' }}
+      >
         💻 Quản lý Sản phẩm
       </Link>
     </div>
   );
 }
-
 // ==========================================
 // 2. TRANG QUẢN LÝ USERS (Dành cho thầy cô chấm điểm)
 // ==========================================
