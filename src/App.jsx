@@ -1,171 +1,156 @@
 import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
 import './index.css';
 
-function App() {
-  const [products, setProducts] = useState([]);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+// ==========================================
+// 1. THANH MENU CHUYỂN TRANG
+// ==========================================
+function NavBar() {
+  return (
+    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+      <Link to="/users" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+        👥 Quản lý Users (Nộp bài)
+      </Link>
+      <Link to="/products" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+        💻 Quản lý Sản phẩm
+      </Link>
+    </div>
+  );
+}
 
-  // State cho chức năng Thêm / Sửa
+// ==========================================
+// 2. TRANG QUẢN LÝ USERS (Dành cho thầy cô chấm điểm)
+// ==========================================
+function UserManager() {
+  const [users, setUsers] = useState([]);
   const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [editingId, setEditingId] = useState(null);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Tách hàm fetch để gọi lại sau khi Thêm/Sửa/Xóa
-  const fetchProducts = () => {
-    setIsLoading(true);
-    fetch('/api/products')
-      .then(response => {
-        if (!response.ok) throw new Error('Không thể kết nối đến máy chủ');
-        return response.json();
-      })
-      .then(data => {
-        setProducts(data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        setErrorMsg(error.message);
-        setIsLoading(false);
-      });
+  const fetchUsers = () => {
+    fetch('/api/users')
+      .then(res => res.ok ? res.json() : Promise.reject('Lỗi server'))
+      .then(data => setUsers(data))
+      .catch(err => setErrorMsg(err));
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
-  // Xử lý gửi Form (Thêm hoặc Sửa)
   const handleSubmit = (e) => {
     e.preventDefault();
-    const productData = { name, price: Number(price) };
-    
-    const url = editingId ? `/api/products/${editingId}` : '/api/products';
-    const method = editingId ? 'PUT' : 'POST';
-
-    fetch(url, {
-      method: method,
+    fetch('/api/users', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(productData)
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Thao tác thất bại');
-      // Reset form
-      setEditingId(null);
-      setName('');
-      setPrice('');
-      // Tải lại dữ liệu
-      fetchProducts();
-    })
-    .catch(error => setErrorMsg(error.message));
-  };
-
-  // Mồi dữ liệu lên Form để Sửa
-  const handleEdit = (product) => {
-    setEditingId(product.id);
-    setName(product.name);
-    setPrice(product.price);
-  };
-
-  // Xử lý Xóa
-  const handleDelete = (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')) {
-      fetch(`/api/products/${id}`, { method: 'DELETE' })
-        .then(response => {
-          if (!response.ok) throw new Error('Xóa thất bại');
-          fetchProducts();
-        })
-        .catch(error => setErrorMsg(error.message));
-    }
+      body: JSON.stringify({ name })
+    }).then(() => { setName(''); fetchUsers(); });
   };
 
   return (
-    <div className="container">
-      <div className="card">
-        <div className="header">
-          <h1 className="title">Quản lý sản phẩm</h1>
-          <span className="badge">Công nghệ</span>
-        </div>
+    <div className="card">
+      <div className="header">
+        <h1 className="title">Danh sách Users</h1>
+        <span className="badge" style={{ background: '#dbeafe', color: '#1e40af' }}>Hệ thống</span>
+      </div>
+      {errorMsg && <div className="error-box">⚠️ {errorMsg}</div>}
+      
+      <form onSubmit={handleSubmit} className="form-inline" style={{ marginBottom: '20px' }}>
+        <input type="text" className="input-field" placeholder="Nhập tên User mới..." value={name} onChange={e => setName(e.target.value)} required />
+        <button type="submit" className="btn btn-primary">Thêm</button>
+      </form>
 
-        {errorMsg && (
-          <div className="error-box">
-            ⚠️ <strong>Lỗi:</strong> {errorMsg}
-          </div>
-        )}
-
-        {/* Khu vực Form nhập liệu */}
-        <div className="form-wrapper">
-          <h3 className="form-title">{editingId ? '✏️ Cập nhật sản phẩm' : '➕ Thêm sản phẩm mới'}</h3>
-          <form onSubmit={handleSubmit} className="form-inline">
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="Tên sản phẩm..." 
-              value={name} 
-              onChange={e => setName(e.target.value)} 
-              required 
-            />
-            <input 
-              type="number" 
-              className="input-field input-price" 
-              placeholder="Giá ($)..." 
-              value={price} 
-              onChange={e => setPrice(e.target.value)} 
-              required 
-            />
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary">
-                {editingId ? 'Lưu thay đổi' : 'Thêm mới'}
-              </button>
-              {editingId && (
-                <button type="button" className="btn btn-secondary" onClick={() => { setEditingId(null); setName(''); setPrice(''); }}>
-                  Hủy
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        <div className="table-wrapper">
-          <table className="table">
-            <thead>
-              <tr>
-                <th className="th">ID</th>
-                <th className="th">Tên sản phẩm</th>
-                <th className="th-right">Giá ($)</th>
-                <th className="th-center">Thao tác</th>
+      <div className="table-wrapper">
+        <table className="table">
+          <thead><tr><th className="th">ID</th><th className="th">Tên User</th><th className="th-center">Chi tiết</th></tr></thead>
+          <tbody>
+            {users.length > 0 ? users.map(u => (
+              <tr key={u.id} className="tr">
+                <td className="td-id">#{u.id}</td>
+                <td className="td-name">{u.name}</td>
+                <td className="td-actions">
+                  <Link to={`/users/${u.id}`} className="btn-icon btn-secondary" style={{ textDecoration: 'none' }}>Xem</Link>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan="4" className="loading-cell">
-                    <div className="spinner"></div>
-                    <p style={{ marginTop: '10px', color: '#64748b' }}>Đang tải dữ liệu...</p>
-                  </td>
-                </tr>
-              ) : products.length > 0 ? (
-                products.map(product => (
-                  <tr key={product.id} className="tr">
-                    <td className="td-id">#{product.id}</td>
-                    <td className="td-name">{product.name}</td>
-                    <td className="td-price">${product.price.toLocaleString()}</td>
-                    <td className="td-actions">
-                      <button className="btn-icon btn-edit" onClick={() => handleEdit(product)}>Sửa</button>
-                      <button className="btn-icon btn-delete" onClick={() => handleDelete(product.id)}>Xóa</button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="empty-cell">
-                    Không có sản phẩm nào.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            )) : <tr><td colSpan="3" className="empty-cell">Chưa có ai.</td></tr>}
+          </tbody>
+        </table>
       </div>
     </div>
+  );
+}
+
+// ==========================================
+// 3. TRANG CHI TIẾT 1 USER (/users/1)
+// ==========================================
+function UserDetail() {
+  const { id } = useParams(); // Lấy số 1 trên thanh địa chỉ xuống
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetch(`/api/users/${id}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => setUser(data));
+  }, [id]);
+
+  return (
+    <div className="card" style={{ maxWidth: '400px', textAlign: 'center' }}>
+      {user ? (
+        <div>
+          <div style={{ fontSize: '80px', marginBottom: '10px' }}>👤</div>
+          <p className="badge" style={{ display: 'inline-block' }}>User ID: #{user.id}</p>
+          <h2 style={{ fontSize: '28px', margin: '10px 0' }}>{user.name}</h2>
+          <button className="btn btn-secondary" onClick={() => navigate('/users')} style={{ marginTop: '20px' }}>⬅ Quay lại</button>
+        </div>
+      ) : <div className="error-box">Không tìm thấy User!</div>}
+    </div>
+  );
+}
+
+// ==========================================
+// 4. TRANG QUẢN LÝ SẢN PHẨM CŨ (Của bạn)
+// ==========================================
+function ProductManager() {
+  const [products, setProducts] = useState([]);
+  
+  useEffect(() => {
+    fetch('/api/products').then(res => res.json()).then(data => setProducts(data));
+  }, []);
+
+  return (
+    <div className="card">
+      <div className="header">
+        <h1 className="title">Danh sách Sản phẩm</h1>
+        <span className="badge">Công nghệ</span>
+      </div>
+      <div className="table-wrapper">
+        <table className="table">
+          <thead><tr><th className="th">ID</th><th className="th">Tên SP</th><th className="th-right">Giá ($)</th></tr></thead>
+          <tbody>
+            {products.length > 0 ? products.map(p => (
+              <tr key={p.id} className="tr"><td className="td-id">#{p.id}</td><td className="td-name">{p.name}</td><td className="td-price">${p.price}</td></tr>
+            )) : <tr><td colSpan="3" className="empty-cell">Chưa có sản phẩm.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// CHƯƠNG TRÌNH CHÍNH
+// ==========================================
+function App() {
+  return (
+    <Router>
+      <div className="container" style={{ flexDirection: 'column', alignItems: 'center' }}>
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<UserManager />} /> {/* Mặc định vào trang Users */}
+          <Route path="/users" element={<UserManager />} />
+          <Route path="/users/:id" element={<UserDetail />} />
+          <Route path="/products" element={<ProductManager />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
