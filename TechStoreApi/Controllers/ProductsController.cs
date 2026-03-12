@@ -23,6 +23,15 @@ namespace TechStoreApi.Controllers
             return Ok(await _context.Products.ToListAsync());
         }
 
+        // Lấy 1 sản phẩm theo ID (Dùng cho trang chi tiết)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProduct(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return NotFound(new { message = "Không tìm thấy sản phẩm" });
+            return Ok(product);
+        }
+
         // 2. Thêm mới (CREATE)
         [HttpPost]
         public async Task<IActionResult> AddProduct([FromBody] Product product)
