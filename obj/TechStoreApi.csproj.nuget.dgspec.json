@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj": {}
+    "C:\\Bo\\XDPMWebBackend\\TechStoreApi\\TechStoreApi.csproj": {}
   },
   "projects": {
-    "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj": {
+    "C:\\Bo\\XDPMWebBackend\\TechStoreApi\\TechStoreApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj",
+        "projectUniqueName": "C:\\Bo\\XDPMWebBackend\\TechStoreApi\\TechStoreApi.csproj",
         "projectName": "TechStoreApi",
-        "projectPath": "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj",
+        "projectPath": "C:\\Bo\\XDPMWebBackend\\TechStoreApi\\TechStoreApi.csproj",
         "packagesPath": "C:\\Users\\Kari\\.nuget\\packages\\",
-        "outputPath": "C:\\Bo\\XD PM Web\\TechStoreApi\\obj\\",
+        "outputPath": "C:\\Bo\\XDPMWebBackend\\TechStoreApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -63,6 +63,10 @@
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[9.0.2, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[7.2.0, )"
             }
           },
           "imports": [

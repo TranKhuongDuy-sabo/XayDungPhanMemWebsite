@@ -16,55 +16,49 @@ namespace TechStoreApi.Controllers
             _context = context;
         }
 
-        // 1. Lấy danh sách (READ)
+        // Lấy danh sách (Đã dùng Select để cắt đứt vòng lặp vô tận)
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
-            return Ok(await _context.Products.ToListAsync());
+            var products = await _context.Products
+                .Select(p => new 
+                {
+                    // Chỉ lấy những cột cần thiết cho Frontend
+                    id = p.ProductId, // Đổi tên thành id cho khớp với Frontend React của bạn
+                    name = p.ProductName, // Đổi tên thành name 
+                    price = p.Price,
+                    stock = p.Stock,
+                    image = p.Image,
+                    description = p.Description,
+                    categoryName = p.Category != null ? p.Category.CategoryName : null,
+                    brandName = p.Brand != null ? p.Brand.BrandName : null
+                })
+                .ToListAsync();
+
+            return Ok(products);
         }
 
-        // Lấy 1 sản phẩm theo ID (Dùng cho trang chi tiết)
+        // Lấy 1 sản phẩm
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products
+                .Where(p => p.ProductId == id)
+                .Select(p => new 
+                {
+                    id = p.ProductId,
+                    name = p.ProductName,
+                    price = p.Price,
+                    stock = p.Stock,
+                    image = p.Image,
+                    description = p.Description,
+                    categoryName = p.Category != null ? p.Category.CategoryName : null,
+                    brandName = p.Brand != null ? p.Brand.BrandName : null
+                })
+                .FirstOrDefaultAsync();
+
             if (product == null) return NotFound(new { message = "Không tìm thấy sản phẩm" });
             return Ok(product);
-        }
-
-        // 2. Thêm mới (CREATE)
-        [HttpPost]
-        public async Task<IActionResult> AddProduct([FromBody] Product product)
-        {
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-            return Ok(product);
-        }
-
-        // 3. Cập nhật (UPDATE)
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
-        {
-            var existingProduct = await _context.Products.FindAsync(id);
-            if (existingProduct == null) return NotFound();
-
-            existingProduct.Name = product.Name;
-            existingProduct.Price = product.Price;
-
-            await _context.SaveChangesAsync();
-            return Ok(existingProduct);
-        }
-
-        // 4. Xóa (DELETE)
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) return NotFound();
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Xóa thành công" });
         }
     }
 }
