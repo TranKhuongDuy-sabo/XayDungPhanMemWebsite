@@ -2,9 +2,6 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate ,useLocation } from 'react-router-dom';
 import './index.css';
 
-// ==========================================
-// 1. THANH MENU CHUYỂN TRANG
-// ==========================================
 function NavBar() {
   const location = useLocation(); // Bắt lấy đường dẫn hiện tại trên trình duyệt
   
@@ -34,9 +31,7 @@ function NavBar() {
     </div>
   );
 }
-// ==========================================
-// 2. TRANG QUẢN LÝ USERS (Dành cho thầy cô chấm điểm)
-// ==========================================
+
 function UserManager() {
   const [users, setUsers] = useState([]);
   const [name, setName] = useState('');
@@ -93,9 +88,6 @@ function UserManager() {
   );
 }
 
-// ==========================================
-// 3. TRANG CHI TIẾT 1 USER (/users/1)
-// ==========================================
 function UserDetail() {
   const { id } = useParams(); // Lấy số 1 trên thanh địa chỉ xuống
   const navigate = useNavigate();
@@ -121,9 +113,6 @@ function UserDetail() {
   );
 }
 
-// ==========================================
-// 4. TRANG QUẢN LÝ SẢN PHẨM CŨ (Của bạn)
-// ==========================================
 function ProductManager() {
   const [products, setProducts] = useState([]);
   
@@ -151,9 +140,6 @@ function ProductManager() {
   );
 }
 
-// ==========================================
-// CHƯƠNG TRÌNH CHÍNH
-// ==========================================
 function App() {
   return (
     <Router>
