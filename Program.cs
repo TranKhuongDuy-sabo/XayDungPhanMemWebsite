@@ -76,15 +76,14 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 // --- 2. CẤU HÌNH PIPELINE (MIDDLEWARE) ---
 
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI(c => 
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
         c.RoutePrefix = string.Empty; 
     });
-}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("AllowReact");
