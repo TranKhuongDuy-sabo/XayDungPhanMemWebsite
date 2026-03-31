@@ -71,7 +71,11 @@ namespace TechStoreApi.Controllers
                 new Claim(ClaimTypes.Role, user.Role ?? "User")
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            // Lấy Secret Key từ cấu hình và xử lý warning null
+            var keyFromConfig = _config["Jwt:Key"] 
+                ?? throw new InvalidOperationException("Chưa cấu hình 'Jwt:Key' trong file appsettings.json!");
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyFromConfig));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor {
