@@ -1,157 +1,23 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate ,useLocation } from 'react-router-dom';
-import './index.css';
-
-function NavBar() {
-  const location = useLocation(); // Bắt lấy đường dẫn hiện tại trên trình duyệt
-  
-  // Logic kiểm tra: Nếu đường dẫn có chứa chữ /users hoặc là trang chủ (/)
-  const isUsersActive = location.pathname.includes('/users') || location.pathname === '/';
-  // Nếu đường dẫn có chứa chữ /products
-  const isProductsActive = location.pathname.includes('/products');
-
-  return (
-    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
-      <Link 
-        to="/users" 
-        // Đổi màu linh hoạt: Active thì dùng màu xanh (primary), không thì màu xám (secondary)
-        className={`btn ${isUsersActive ? 'btn-primary' : 'btn-secondary'}`} 
-        style={{ textDecoration: 'none', transition: 'all 0.3s ease' }}
-      >
-        👥 Quản lý Users (Nộp bài)
-      </Link>
-      
-      <Link 
-        to="/products" 
-        className={`btn ${isProductsActive ? 'btn-primary' : 'btn-secondary'}`} 
-        style={{ textDecoration: 'none', transition: 'all 0.3s ease' }}
-      >
-        💻 Quản lý Sản phẩm
-      </Link>
-    </div>
-  );
-}
-
-function UserManager() {
-  const [users, setUsers] = useState([]);
-  const [name, setName] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-
-  const fetchUsers = () => {
-    fetch('/api/users')
-      .then(res => res.ok ? res.json() : Promise.reject('Lỗi server'))
-      .then(data => setUsers(data))
-      .catch(err => setErrorMsg(err));
-  };
-
-  useEffect(() => { fetchUsers(); }, []);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
-    }).then(() => { setName(''); fetchUsers(); });
-  };
-
-  return (
-    <div className="card">
-      <div className="header">
-        <h1 className="title">Danh sách Users</h1>
-        <span className="badge" style={{ background: '#dbeafe', color: '#1e40af' }}>Hệ thống</span>
-      </div>
-      {errorMsg && <div className="error-box">⚠️ {errorMsg}</div>}
-      
-      <form onSubmit={handleSubmit} className="form-inline" style={{ marginBottom: '20px' }}>
-        <input type="text" className="input-field" placeholder="Nhập tên User mới..." value={name} onChange={e => setName(e.target.value)} required />
-        <button type="submit" className="btn btn-primary">Thêm</button>
-      </form>
-
-      <div className="table-wrapper">
-        <table className="table">
-          <thead><tr><th className="th">ID</th><th className="th">Tên User</th><th className="th-center">Chi tiết</th></tr></thead>
-          <tbody>
-            {users.length > 0 ? users.map(u => (
-              <tr key={u.id} className="tr">
-                <td className="td-id">#{u.id}</td>
-                <td className="td-name">{u.name}</td>
-                <td className="td-actions">
-                  <Link to={`/users/${u.id}`} className="btn-icon btn-secondary" style={{ textDecoration: 'none' }}>Xem</Link>
-                </td>
-              </tr>
-            )) : <tr><td colSpan="3" className="empty-cell">Chưa có ai.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function UserDetail() {
-  const { id } = useParams(); // Lấy số 1 trên thanh địa chỉ xuống
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    fetch(`/api/users/${id}`)
-      .then(res => res.ok ? res.json() : null)
-      .then(data => setUser(data));
-  }, [id]);
-
-  return (
-    <div className="card" style={{ maxWidth: '400px', textAlign: 'center' }}>
-      {user ? (
-        <div>
-          <div style={{ fontSize: '80px', marginBottom: '10px' }}>👤</div>
-          <p className="badge" style={{ display: 'inline-block' }}>User ID: #{user.id}</p>
-          <h2 style={{ fontSize: '28px', margin: '10px 0' }}>{user.name}</h2>
-          <button className="btn btn-secondary" onClick={() => navigate('/users')} style={{ marginTop: '20px' }}>⬅ Quay lại</button>
-        </div>
-      ) : <div className="error-box">Không tìm thấy User!</div>}
-    </div>
-  );
-}
-
-function ProductManager() {
-  const [products, setProducts] = useState([]);
-  
-  useEffect(() => {
-    fetch('/api/products').then(res => res.json()).then(data => setProducts(data));
-  }, []);
-
-  return (
-    <div className="card">
-      <div className="header">
-        <h1 className="title">Danh sách Sản phẩm</h1>
-        <span className="badge">Công nghệ</span>
-      </div>
-      <div className="table-wrapper">
-        <table className="table">
-          <thead><tr><th className="th">ID</th><th className="th">Tên SP</th><th className="th-right">Giá ($)</th></tr></thead>
-          <tbody>
-            {products.length > 0 ? products.map(p => (
-              <tr key={p.id} className="tr"><td className="td-id">#{p.id}</td><td className="td-name">{p.name}</td><td className="td-price">${p.price}</td></tr>
-            )) : <tr><td colSpan="3" className="empty-cell">Chưa có sản phẩm.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import MainLayout from './components/Layout/MainLayout';
+import Home from './pages/Home';
+import Products from './pages/Products';
+import UserManager from './pages/UserManager';
 
 function App() {
   return (
     <Router>
-      <div className="container" style={{ flexDirection: 'column', alignItems: 'center' }}>
-        <NavBar />
-        <Routes>
-          <Route path="/" element={<UserManager />} /> {/* Mặc định vào trang Users */}
-          <Route path="/users" element={<UserManager />} />
-          <Route path="/users/:id" element={<UserDetail />} />
-          <Route path="/products" element={<ProductManager />} />
-        </Routes>
-      </div>
+      <Routes>
+        {/* Route cha dùng MainLayout làm khung */}
+        <Route path="/" element={<MainLayout />}>
+          
+          {/* Các Route con nằm bên trong */}
+          <Route index element={<Home />} />
+          <Route path="products" element={<Products />} />
+          <Route path="users" element={<UserManager />} />
+          
+        </Route>
+      </Routes>
     </Router>
   );
 }
