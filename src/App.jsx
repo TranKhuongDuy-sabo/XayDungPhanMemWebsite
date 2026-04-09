@@ -13,6 +13,8 @@ import Products from './pages/Products';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import UserManager from './pages/UserManager';
+// 1. IMPORT COMPONENT MỚI VÀO ĐÂY 👇
+import ProductManager from './pages/ProductManager'; 
 
 function App() {
   return (
@@ -41,7 +43,10 @@ function App() {
             
             {/* Các trang quản lý */}
             <Route path="users" element={<UserManager />} />
-            <Route path="products" element={<h1 className="text-2xl font-bold text-slate-800">Giao diện Quản lý Sản phẩm</h1>} />
+            
+            {/* 2. RÁP COMPONENT VÀO ĐÂY 👇 (Đã xóa thẻ <h1> cũ) */}
+            <Route path="products" element={<ProductManager />} />
+            
           </Route>
 
         </Route>
