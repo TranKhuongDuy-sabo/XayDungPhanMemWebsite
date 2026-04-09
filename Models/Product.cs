@@ -11,7 +11,6 @@ public partial class Product
 {
     [Key]
     [Column("ProductID")]
-    [Required(ErrorMessage = "Mã sản phẩm tự tăng")]
     [DisplayName("ID")]
     public int ProductId { get; set; }
 
@@ -21,12 +20,12 @@ public partial class Product
     public string ProductName { get; set; } = null!;
 
     [Column("CategoryID")]
-    [Required(ErrorMessage = "Danh mục không được bỏ trống!")]
+    // ĐÃ XÓA [Required] Ở ĐÂY ĐỂ TRÁNH XUNG ĐỘT DATABASE
     [DisplayName("Danh mục")]
     public int? CategoryId { get; set; }
 
     [Column("BrandID")]
-    [Required(ErrorMessage = "Tên thương hiệu không được bỏ trống!")]
+    // ĐÃ XÓA [Required] Ở ĐÂY ĐỂ TRÁNH XUNG ĐỘT DATABASE
     [DisplayName("Thương hiệu")]
     public int? BrandId { get; set; }
 
@@ -58,4 +57,6 @@ public partial class Product
 
     [InverseProperty("Product")]
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
