@@ -29,6 +29,9 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public DbSet<Contact> Contacts { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+
     // ĐÃ XÓA hàm OnConfiguring() ở đây để dùng chuỗi kết nối từ appsettings.json và Program.cs
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
