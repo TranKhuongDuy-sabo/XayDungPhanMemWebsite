@@ -4,11 +4,37 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Hàm xử lý link ảnh: Nếu là link Cloudinary thì giữ nguyên, nếu là tên file thì nối thêm path (tùy Backend của bạn)
   const getImageUrl = (imgName) => {
     if (!imgName) return "https://via.placeholder.com/300";
     if (imgName.startsWith('http')) return imgName;
-    return `http://localhost:5164/uploads/${imgName}`; // Chỉnh lại đường dẫn ảnh của Backend nếu cần
+    return `http://localhost:5164/uploads/${imgName}`;
+  };
+
+  // --- 🔥 BƯỚC 1: THÊM HÀM ADD TO CART GIỐNG TRANG HOME ---
+  const addToCart = (product) => {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+    // Tìm ID: Duy lưu ý API trả về 'id' hay 'productId' thì dùng cho đúng nhé
+    const index = cart.findIndex(item => item.id === product.id);
+    
+    if (index > -1) {
+      cart[index].quantity += 1;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: 1
+      });
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Bắn sự kiện để Header nhảy số badge đỏ
+    window.dispatchEvent(new Event('storage'));
+    
+    alert(`Đã thêm "${product.name}" vào giỏ hàng!`);
   };
 
   useEffect(() => {
@@ -32,7 +58,6 @@ const Products = () => {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* --- TIÊU ĐỀ & BỘ LỌC NHANH --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-800 uppercase tracking-tight">
@@ -50,27 +75,23 @@ const Products = () => {
         </div>
       </div>
 
-      {/* --- GRID SẢN PHẨM --- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
           <div 
             key={product.id} 
             className="bg-white rounded-2xl border border-slate-100 p-4 hover:shadow-2xl transition-all group flex flex-col justify-between"
           >
-            {/* Ảnh sản phẩm */}
             <div className="relative aspect-square rounded-xl bg-slate-50 overflow-hidden mb-4 flex items-center justify-center p-4">
               <img 
                 src={getImageUrl(product.image)} 
                 alt={product.name}
                 className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500"
               />
-              {/* Badge Thương hiệu */}
               <span className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-md text-white text-[10px] px-2 py-1 rounded font-bold">
                 {product.brandName}
               </span>
             </div>
 
-            {/* Thông tin chi tiết */}
             <div className="space-y-2">
               <span className="text-blue-600 text-[10px] font-black uppercase tracking-widest">
                 {product.categoryName}
@@ -88,13 +109,13 @@ const Products = () => {
                 </p>
               </div>
 
-              {/* Mô tả ngắn */}
               <p className="text-[12px] text-slate-500 line-clamp-2 italic h-8">
                 {product.description || "Đang cập nhật thông tin chi tiết..."}
               </p>
 
-              {/* Nút thao tác */}
+              {/* --- 🔥 BƯỚC 2: GẮN onClick VÀO ĐÂY --- */}
               <button 
+                onClick={() => addToCart(product)}
                 disabled={product.stock <= 0}
                 className={`w-full mt-4 py-3 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2
                   ${product.stock > 0 

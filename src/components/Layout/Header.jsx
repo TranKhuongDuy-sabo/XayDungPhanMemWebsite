@@ -5,40 +5,54 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // 1. State quản lý số lượng giỏ hàng
+  // 1. STATE QUẢN LÝ TÌM KIẾM
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // 2. STATE QUẢN LÝ GIỎ HÀNG
   const [cartCount, setCartCount] = useState(0);
 
-  // 2. Hàm cập nhật con số trên Badge
+  const username = localStorage.getItem('username');
+  const role = localStorage.getItem('role');
+
+  // --- 🔥 HÀM LẤY KEY GIỎ HÀNG RIÊNG BIỆT ---
+  const getCartKey = () => {
+    return username ? `cart_${username}` : 'cart_guest';
+  };
+
   const updateCartBadge = () => {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    // Cộng dồn tất cả quantity trong giỏ
+    const cartKey = getCartKey();
+    const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
     const total = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
     setCartCount(total);
   };
 
   useEffect(() => {
-    // Chạy ngay khi load trang
     updateCartBadge();
-
-    // Lắng nghe sự kiện 'storage' từ các trang khác (như trang Home, Products)
     window.addEventListener('storage', updateCartBadge);
-
-    // Dọn dẹp listener khi component bị hủy
     return () => window.removeEventListener('storage', updateCartBadge);
-  }, []);
+  }, [username]); // Khi username thay đổi (đăng nhập/out), cập nhật lại số badge
 
-  // State quản lý việc mở/đóng Dropdown Menu của User
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-  const username = localStorage.getItem('username');
-  const role = localStorage.getItem('role');
 
   const isActive = (path) => location.pathname === path ? "text-blue-600 font-bold" : "text-slate-600 hover:text-blue-600 font-medium transition-colors";
 
+  // --- 🔥 HÀM TÌM KIẾM ---
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/products?search=${searchTerm.trim()}`);
+      // setSearchTerm(""); // Có thể xóa hoặc giữ lại tùy Duy
+    }
+  };
+
+  // --- 🔥 HÀM ĐĂNG XUẤT (KHÔNG XÓA GIỎ HÀNG) ---
   const handleLogout = () => {
     if (window.confirm('Bạn có chắc chắn muốn đăng xuất không?')) {
-      localStorage.clear();
-      setCartCount(0); // Reset số giỏ hàng khi logout
+      // Chỉ xóa thông tin đăng nhập, KHÔNG xóa giỏ hàng
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
+      
       setIsProfileOpen(false);
       navigate('/login');
     }
@@ -53,18 +67,24 @@ const Header = () => {
           SABO<span className="text-blue-600">TECH</span>
         </Link>
 
-        {/* THANH TÌM KIẾM */}
-        <div className="hidden md:flex flex-1 max-w-2xl relative">
-          <input type="text" placeholder="Tìm laptop, linh kiện PC..." className="w-full border-2 border-blue-600 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-200 transition-all" />
-          <button className="absolute right-0 top-0 h-full bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-r-md transition-colors">🔍</button>
-        </div>
+        {/* THANH TÌM KIẾM - Đã thêm Logic */}
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl relative">
+          <input 
+            type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Tìm laptop, linh kiện PC..." 
+            className="w-full border-2 border-blue-600 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-200 transition-all" 
+          />
+          <button type="submit" className="absolute right-0 top-0 h-full bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-r-md transition-colors">🔍</button>
+        </form>
 
         {/* NAVIGATION & ACTION BUTTONS */}
         <nav className="flex items-center gap-6">
           <Link to="/" className={isActive('/')}>Trang chủ</Link>
           <Link to="/products" className={isActive('/products')}>Sản phẩm</Link>
 
-          {/* NÚT GIỎ HÀNG (ĐÃ CẬP NHẬT DỰA TRÊN STATE) */}
+          {/* NÚT GIỎ HÀNG */}
           <Link to="/cart" className="relative text-2xl cursor-pointer hover:scale-110 transition-transform">
             🛒
             {cartCount > 0 && (
@@ -74,7 +94,7 @@ const Header = () => {
             )}
           </Link>
 
-          {/* KHU VỰC USER / WELCOME DROPDOWN */}
+          {/* KHU VỰC USER */}
           {username ? (
             <div className="relative border-l-2 border-slate-200 pl-4 ml-2">
               <button 
@@ -93,27 +113,16 @@ const Header = () => {
               {isProfileOpen && (
                 <div className="absolute right-0 mt-4 w-48 bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-fadeIn">
                   {role === 'Admin' ? (
-                    <Link 
-                      to="/admin" 
-                      onClick={() => setIsProfileOpen(false)}
-                      className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors"
-                    >
+                    <Link to="/admin" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
                       ⚙️ Trang Quản lý
                     </Link>
                   ) : (
-                    <Link 
-                      to="/profile" 
-                      onClick={() => setIsProfileOpen(false)}
-                      className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors"
-                    >
+                    <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
                       👤 Thông tin cá nhân
                     </Link>
                   )}
                   <div className="border-t border-slate-100 my-1"></div>
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 font-bold transition-colors"
-                  >
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 font-bold transition-colors">
                     🚪 Đăng xuất
                   </button>
                 </div>
