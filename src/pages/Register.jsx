@@ -64,7 +64,7 @@ const Register = () => {
             <input 
               type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
               className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-              placeholder="VD: Trần Khương Duy" 
+              placeholder="VD: Nguyễn Văn A" 
             />
           </div>
 

@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* Hiệu ứng thanh trượt cạn dần */
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* Hiệu ứng trượt ra nhẹ nhàng rồi mờ dần */
+@keyframes fadeOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(50px); }
+}
+
+.animate-shrink {
+  animation: shrink 3s linear forwards;
+}
+
+.animate-fadeOut {
+  animation: fadeOutRight 0.4s ease-in-out forwards;
+}

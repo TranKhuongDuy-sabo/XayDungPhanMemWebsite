@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Toast from './components/Toast';
 
 // Import Layouts
 import MainLayout from './components/Layout/MainLayout';
@@ -24,6 +25,7 @@ import Cart from './pages/Cart';
 function App() {
   return (
     <Router>
+      <Toast />
       <Routes>
         
         {/* ======================================= */}

@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { showToast } from '../components/Toast';
 
 const Home = () => {
     const API_BASE_URL = 'http://localhost:5164/api';
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (location.state?.loginSuccess) {
+            const username = localStorage.getItem('username');
+            showToast(`Đăng nhập thành công! Chào mừng ${username}`, 'success');
+            // Xóa state để không lặp lại khi F5
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location, navigate]);
 
     // --- 🔥 BƯỚC 1: HÀM LẤY KEY GIỎ HÀNG RIÊNG BIỆT ---
     const getCartKey = () => {
@@ -55,7 +68,7 @@ const Home = () => {
         // Bắn sự kiện để Header (cũng phải dùng getCartKey) nhảy số
         window.dispatchEvent(new Event('storage'));
         
-        alert(`Đã thêm vào giỏ hàng của ${localStorage.getItem('username') || 'khách'}!`);
+        showToast(`Đã thêm ${product.name} vào giỏ!`, 'success');
     };
 
     return (
