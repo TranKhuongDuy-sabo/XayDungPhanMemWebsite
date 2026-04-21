@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-// Import thư viện Icon (Feather Icons - tối giản, hiện đại)
-import { FiSearch, FiShoppingCart, FiMenu, FiX, FiChevronDown, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
+// 🔥 Đã bổ sung đầy đủ FiPackage
+import { FiSearch, FiShoppingCart, FiMenu, FiX, FiChevronDown, FiUser, FiSettings, FiLogOut, FiPackage } from 'react-icons/fi';
 
 const Header = () => {
   const location = useLocation();
@@ -15,7 +15,7 @@ const Header = () => {
   const [categories, setCategories] = useState([]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // Modal thay thế window.confirm
+  const [showLogoutModal, setShowLogoutModal] = useState(false); 
 
   const username = localStorage.getItem('username');
   const role = localStorage.getItem('role');
@@ -35,16 +35,13 @@ const Header = () => {
     updateCartBadge();
     window.addEventListener('storage', updateCartBadge);
 
-    // Lấy danh mục từ API cho Menu Sản phẩm
     const fetchCategories = async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/Categories`);
-
         const activeCats = res.data.filter(cat =>
           cat.isActive === true || cat.isActive === "true" || cat.isActive === "True" || cat.IsActive === true
         );
-
-        setCategories(activeCats); // Chỉ lưu những danh mục đang bật
+        setCategories(activeCats); 
       } catch (error) {
         console.error("Lỗi lấy danh mục:", error);
       }
@@ -64,7 +61,7 @@ const Header = () => {
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/products?search=${searchTerm.trim()}`);
-      setIsMobileMenuOpen(false); // Đóng menu mobile khi tìm kiếm
+      setIsMobileMenuOpen(false); 
     }
   };
 
@@ -118,7 +115,6 @@ const Header = () => {
               <Link to="/products" className={`flex items-center gap-1 ${isActive('/products')}`}>
                 Sản phẩm <FiChevronDown className="group-hover:rotate-180 transition-transform duration-300" />
               </Link>
-              {/* Menu con xổ xuống */}
               <div className="absolute top-20 left-1/2 -translate-x-1/2 w-56 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 overflow-hidden">
                 <Link to="/products" className="block px-5 py-3 text-sm font-bold text-blue-600 bg-blue-50/50 border-b border-slate-50">
                   Tất Cả Sản Phẩm
@@ -166,30 +162,48 @@ const Header = () => {
                   </div>
                 </button>
 
-                {/* USER DROPDOWN */}
+                {/* 🔥 USER DROPDOWN ĐÃ ĐƯỢC FIX LỖI VÀ CHUẨN HÓA 🔥 */}
                 {isProfileOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
-                    <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-fadeIn origin-top-right">
-                      {role === 'Admin' ? (
-                        <Link to="/admin" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
-                          <FiSettings className="text-lg" /> Trang Quản lý
-                        </Link>
-                      ) : (
-                        <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-5 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
+                    <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-fadeIn origin-top-right">
+                      
+                      <div className="px-5 py-3 border-b border-slate-50 mb-2 bg-slate-50/50">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Tài khoản</p>
+                        <p className="font-black text-slate-800 truncate">{username}</p>
+                      </div>
+
+                      <div className="px-2 space-y-1">
+                        {role === 'Admin' && (
+                          <Link to="/admin" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
+                            <FiSettings className="text-lg" /> Trang Quản Trị
+                          </Link>
+                        )}
+                        
+                        <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
                           <FiUser className="text-lg" /> Thông tin cá nhân
                         </Link>
-                      )}
-                      <div className="border-t border-slate-100 my-1"></div>
-                      <button
-                        onClick={() => {
-                          setIsProfileOpen(false);
-                          setShowLogoutModal(true); // Bật Modal thay vì dùng window.confirm
-                        }}
-                        className="w-full flex items-center gap-3 px-5 py-3 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 font-bold transition-colors"
-                      >
-                        <FiLogOut className="text-lg" /> Đăng xuất
-                      </button>
+                        
+                        {role !== 'Admin' && (
+                          <Link to="/myorders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
+                            <FiPackage className="text-lg" /> Đơn hàng của tôi
+                          </Link>
+                        )}
+                      </div>
+
+                      <div className="border-t border-slate-100 my-2"></div>
+                      
+                      <div className="px-2">
+                        <button
+                          onClick={() => {
+                            setIsProfileOpen(false);
+                            setShowLogoutModal(true);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 font-black rounded-xl transition-colors"
+                        >
+                          <FiLogOut className="text-lg" /> Đăng xuất
+                        </button>
+                      </div>
                     </div>
                   </>
                 )}
@@ -248,7 +262,7 @@ const Header = () => {
         </div>
       </header>
 
-      {/* --- 🔥 MODAL ĐĂNG XUẤT (IN-APP NOTIFICATION) --- */}
+      {/* --- 🔥 MODAL ĐĂNG XUẤT --- */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-slideUp">

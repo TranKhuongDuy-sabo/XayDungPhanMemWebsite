@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { showToast } from '../Toast'; 
+import { showToast } from '../Toast';
 // Import bộ icon chuyên nghiệp
-import { FiPieChart, FiUsers, FiFolder, FiTag, FiMonitor, FiGlobe, FiLogOut } from 'react-icons/fi';
+import { FiPieChart, FiUsers, FiFolder, FiTag, FiMonitor, FiGlobe, FiLogOut, FiShoppingBag } from 'react-icons/fi';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const AdminLayout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('role');
-    
+
     setShowLogoutModal(false);
     navigate('/login');
   };
@@ -40,7 +40,7 @@ const AdminLayout = () => {
 
         {/* --- CỘT SIDEBAR TRÁI --- */}
         <aside className="w-64 bg-slate-900 text-white flex flex-col transition-all border-r border-slate-800">
-          
+
           {/* Logo Admin */}
           <div className="h-20 flex items-center justify-center border-b border-slate-800">
             <Link to="/admin" className="text-2xl font-black italic tracking-tighter hover:scale-105 transition-transform">
@@ -64,6 +64,10 @@ const AdminLayout = () => {
 
             <Link to="/admin/brands" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${isActive('/admin/brands')}`}>
               <FiTag className="text-lg" /> Quản lý Thương hiệu
+            </Link>
+
+            <Link to="/admin/order" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${isActive('/admin/order')}`}>
+              <FiShoppingBag className="text-lg" /> Quản lý Đơn hàng
             </Link>
 
             <Link to="/admin/products" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${isActive('/admin/products')}`}>
@@ -90,7 +94,7 @@ const AdminLayout = () => {
 
         {/* --- VÙNG NỘI DUNG CHÍNH (BÊN PHẢI) --- */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          
+
           {/* Topbar của Admin */}
           <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm">
             <h2 className="text-xl font-bold text-slate-800 tracking-tight">Hệ thống Quản trị</h2>
@@ -125,13 +129,13 @@ const AdminLayout = () => {
             <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Đăng xuất?</h3>
             <p className="text-center text-slate-500 mb-8 text-sm">Bạn có chắc chắn muốn đóng phiên làm việc quản trị không?</p>
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={() => setShowLogoutModal(false)}
                 className="flex-1 py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors active:scale-95"
               >
                 Hủy
               </button>
-              <button 
+              <button
                 onClick={executeLogout}
                 className="flex-1 py-3.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-all shadow-lg shadow-red-500/30 active:scale-95"
               >

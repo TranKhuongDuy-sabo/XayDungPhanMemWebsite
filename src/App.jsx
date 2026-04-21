@@ -19,8 +19,10 @@ import CategoryManager from './pages/CategoryManager';
 import BrandManager from './pages/BrandManager';
 import Dashboard from './pages/Dashboard'; 
 import Contact from './pages/Contact';
-
-// 🔥 Bước 1: Import trang Cart Duy vừa tạo
+import Profile from './pages/Profile';
+import MyOrders from './pages/MyOrders';
+import OrderManager from './pages/OrderManager';
+import Checkout from './pages/Checkout';
 import Cart from './pages/Cart'; 
 
 function App() {
@@ -39,6 +41,9 @@ function App() {
           <Route path="register" element={<Register />} />
           <Route path="contact" element={<Contact />} />
           <Route path="cart" element={<Cart />} />
+          <Route path="profile" element={<Profile/>}/>
+          <Route path="myorders" element={<MyOrders/>}/>
+          <Route path="checkout" element={<Checkout />} />
         </Route>
 
         {/* ======================================= */}
@@ -52,6 +57,7 @@ function App() {
             <Route path="brands" element={<BrandManager />} />
             <Route path="users" element={<UserManager />} />
             <Route path="products" element={<ProductManager />} />
+            <Route path="order" element={<OrderManager />} />
           </Route>
 
         </Route>

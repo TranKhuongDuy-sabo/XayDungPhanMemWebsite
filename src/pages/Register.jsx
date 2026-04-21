@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { showToast } from '../components/Toast'; // 🔥 Import Toast vào đây
+import { showToast } from '../components/Toast'; 
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Register = () => {
   const [fullName, setFullName] = useState('');
