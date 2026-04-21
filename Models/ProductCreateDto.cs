@@ -27,4 +27,7 @@ public class ProductCreateDto
     public int BrandId { get; set; }
 
     public IFormFile? ImageFile { get; set; } // Đây là nơi nhận file ảnh thực tế
+
+    public bool IsActive { get; set; }
+    public bool IsFeatured { get; set; }
 }

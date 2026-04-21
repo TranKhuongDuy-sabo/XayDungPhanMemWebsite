@@ -55,6 +55,9 @@ public partial class Product
     [DisplayName("Hiển thị")]
     public bool IsActive { get; set; } = true; // Mặc định là bật
 
+    [DisplayName("Nổi bật")]
+    public bool IsFeatured { get; set; } = false;
+
     [InverseProperty("Product")]
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 

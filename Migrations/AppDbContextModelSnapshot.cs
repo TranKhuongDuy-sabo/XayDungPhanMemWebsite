@@ -202,6 +202,9 @@ namespace TechStoreApi.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18, 0)");
 
@@ -290,6 +293,12 @@ namespace TechStoreApi.Migrations
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ResetCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ResetCodeExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Role")
                         .ValueGeneratedOnAdd()

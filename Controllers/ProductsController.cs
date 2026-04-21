@@ -26,20 +26,22 @@ namespace TechStoreApi.Controllers
         public async Task<IActionResult> GetProducts()
         {
             var products = await _context.Products
-                .Select(p => new {
+                .Select(p => new
+                {
                     id = p.ProductId,
                     name = p.ProductName,
                     price = p.Price,
                     stock = p.Stock,
                     image = p.Image,
-                    description = p.Description,
+                    categoryId = p.CategoryId,
                     categoryName = p.Category != null ? p.Category.CategoryName : null,
+                    categoryIsActive = p.Category != null ? p.Category.IsActive : true,
                     brandName = p.Brand != null ? p.Brand.BrandName : null,
-                    isActive = p.IsActive
+                    isActive = p.IsActive,
+                    isFeatured = p.IsFeatured
                 })
                 .ToListAsync();
             return Ok(products);
-          
         }
 
         // 2. LẤY CHI TIẾT
@@ -53,7 +55,8 @@ namespace TechStoreApi.Controllers
 
             if (p == null) return NotFound(new { message = "Không tìm thấy sản phẩm" });
 
-            return Ok(new {
+            return Ok(new
+            {
                 id = p.ProductId,
                 name = p.ProductName,
                 price = p.Price,
@@ -61,7 +64,9 @@ namespace TechStoreApi.Controllers
                 image = p.Image,
                 description = p.Description,
                 categoryId = p.CategoryId,
-                brandId = p.BrandId
+                brandId = p.BrandId,
+                isActive = p.IsActive,
+                isFeatured = p.IsFeatured
             });
         }
 
@@ -70,17 +75,20 @@ namespace TechStoreApi.Controllers
         [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> PostProduct([FromForm] ProductCreateDto dto)
         {
-            var product = new Product {
+            var product = new Product
+            {
                 ProductName = dto.ProductName,
                 CategoryId = dto.CategoryId,
                 BrandId = dto.BrandId,
                 Price = dto.Price,
                 Stock = dto.Stock,
                 Description = dto.Description,
-                IsActive = true
+                IsActive = dto.IsActive,
+                IsFeatured = dto.IsFeatured
             };
 
-            if (dto.ImageFile != null) {
+            if (dto.ImageFile != null)
+            {
                 var result = await _photoService.AddPhotoAsync(dto.ImageFile);
                 if (result.Error != null) return BadRequest(result.Error.Message);
                 product.Image = result.SecureUrl.AbsoluteUri;
@@ -108,9 +116,12 @@ namespace TechStoreApi.Controllers
             product.Description = dto.Description;
             product.CategoryId = dto.CategoryId;
             product.BrandId = dto.BrandId;
+            product.IsActive = dto.IsActive;
+            product.IsFeatured = dto.IsFeatured;
 
             // Xử lý ảnh nếu có upload ảnh mới
-            if (dto.ImageFile != null) {
+            if (dto.ImageFile != null)
+            {
                 var result = await _photoService.AddPhotoAsync(dto.ImageFile);
                 product.Image = result.SecureUrl.AbsoluteUri;
             }

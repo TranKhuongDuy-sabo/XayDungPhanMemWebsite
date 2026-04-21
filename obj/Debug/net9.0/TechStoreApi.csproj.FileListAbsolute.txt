@@ -667,3 +667,6 @@ C:\VANGIAP\Lập trình web\Backend\SaboTech\XayDungPhanMemWebsite\obj\Debug\net
 C:\VANGIAP\Lập trình web\Backend\SaboTech\XayDungPhanMemWebsite\obj\Debug\net9.0\TechStoreApi.pdb
 C:\VANGIAP\Lập trình web\Backend\SaboTech\XayDungPhanMemWebsite\obj\Debug\net9.0\TechStoreApi.genruntimeconfig.cache
 C:\VANGIAP\Lập trình web\Backend\SaboTech\XayDungPhanMemWebsite\obj\Debug\net9.0\ref\TechStoreApi.dll
+C:\Bo\XDPMWebBackend\API\XayDungPhanMemWebsite\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
+C:\Bo\XDPMWebBackend\API\XayDungPhanMemWebsite\bin\Debug\net9.0\MailKit.dll
+C:\Bo\XDPMWebBackend\API\XayDungPhanMemWebsite\bin\Debug\net9.0\MimeKit.dll

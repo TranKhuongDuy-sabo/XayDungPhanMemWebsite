@@ -29,5 +29,6 @@ public class ProductUpdateDto
     public int BrandId { get; set; }
 
     public IFormFile? ImageFile { get; set; }
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; }
+    public bool IsFeatured { get; set; }
 }
