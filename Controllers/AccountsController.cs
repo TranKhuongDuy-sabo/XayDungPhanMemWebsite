@@ -214,6 +214,51 @@ namespace TechStoreApi.Controllers
 
             return Ok(new { message = "Đã xóa tài khoản vĩnh viễn!" });
         }
+
+        // ==================== QUẢN LÝ PROFILE ====================
+
+        // 1. Lấy thông tin Profile
+        [HttpGet("profile/{username}")]
+        public async Task<IActionResult> GetProfile(string username)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null) return NotFound("Không tìm thấy người dùng");
+            return Ok(new
+            {
+                fullName = user.FullName,
+                email = user.Email,
+                phone = user.Phone,
+                address = user.Address
+            });
+        }
+
+        // 2. Cập nhật Profile
+        [HttpPut("profile/{username}")]
+        public async Task<IActionResult> UpdateProfile(string username, [FromBody] UpdateProfileDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null) return NotFound("Không tìm thấy tài khoản!");
+
+            user.FullName = dto.FullName;
+            user.Phone = dto.Phone;
+            user.Email = dto.Email;
+            user.Address = dto.Address;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Cập nhật thành công!" });
+        }
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePassDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.Password))
+                return BadRequest("Mật khẩu hiện tại không đúng!");
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Đổi mật khẩu thành công!" });
+        }
     }
 
     // ==================== CÁC CLASS DTO ====================
@@ -234,5 +279,21 @@ namespace TechStoreApi.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
+    }
+
+    // 3. Đổi mật khẩu
+    public class ChangePassDto
+    {
+        public string Username { get; set; }
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+    }
+
+    public class UpdateProfileDto
+    {
+        public string? FullName { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? Address { get; set; }
     }
 }
