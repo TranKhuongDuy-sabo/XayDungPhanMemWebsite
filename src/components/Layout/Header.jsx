@@ -39,7 +39,12 @@ const Header = () => {
     const fetchCategories = async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/Categories`);
-        setCategories(res.data);
+
+        const activeCats = res.data.filter(cat =>
+          cat.isActive === true || cat.isActive === "true" || cat.isActive === "True" || cat.IsActive === true
+        );
+
+        setCategories(activeCats); // Chỉ lưu những danh mục đang bật
       } catch (error) {
         console.error("Lỗi lấy danh mục:", error);
       }
@@ -50,8 +55,8 @@ const Header = () => {
   }, [username]);
 
   // --- UI HELPERS ---
-  const isActive = (path) => location.pathname === path 
-    ? "text-blue-600 font-bold" 
+  const isActive = (path) => location.pathname === path
+    ? "text-blue-600 font-bold"
     : "text-slate-600 hover:text-blue-600 font-medium transition-colors duration-300";
 
   // --- ACTIONS ---
@@ -76,9 +81,9 @@ const Header = () => {
     <>
       <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100 sticky top-0 z-40 transition-all duration-300">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4 md:gap-8">
-          
+
           {/* NÚT MENU MOBILE */}
-          <button 
+          <button
             className="md:hidden text-slate-800 text-2xl p-2 hover:bg-slate-100 rounded-lg transition-all"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -92,12 +97,12 @@ const Header = () => {
 
           {/* THANH TÌM KIẾM (DESKTOP) */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl relative group">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm laptop, linh kiện PC..." 
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-2.5 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300" 
+              placeholder="Tìm laptop, linh kiện PC..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-2.5 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
             />
             <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors duration-300">
               <FiSearch className="text-xl" />
@@ -107,7 +112,7 @@ const Header = () => {
           {/* NAVIGATION (DESKTOP) */}
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/" className={isActive('/')}>Trang chủ</Link>
-            
+
             {/* DROPDOWN SẢN PHẨM */}
             <div className="relative group py-8">
               <Link to="/products" className={`flex items-center gap-1 ${isActive('/products')}`}>
@@ -119,8 +124,8 @@ const Header = () => {
                   Tất Cả Sản Phẩm
                 </Link>
                 {categories.map(cat => (
-                  <Link 
-                    key={cat.categoryId || cat.id} 
+                  <Link
+                    key={cat.categoryId || cat.id}
                     to={`/products?category=${cat.categoryId || cat.id}`}
                     className="block px-5 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors"
                   >
@@ -148,7 +153,7 @@ const Header = () => {
             {/* KHU VỰC USER */}
             {username ? (
               <div className="relative">
-                <button 
+                <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 pl-2 md:pl-4 md:border-l border-slate-200 focus:outline-none group"
                 >
@@ -176,11 +181,11 @@ const Header = () => {
                         </Link>
                       )}
                       <div className="border-t border-slate-100 my-1"></div>
-                      <button 
+                      <button
                         onClick={() => {
                           setIsProfileOpen(false);
                           setShowLogoutModal(true); // Bật Modal thay vì dùng window.confirm
-                        }} 
+                        }}
                         className="w-full flex items-center gap-3 px-5 py-3 text-sm text-red-500 hover:bg-red-50 hover:text-red-600 font-bold transition-colors"
                       >
                         <FiLogOut className="text-lg" /> Đăng xuất
@@ -201,12 +206,12 @@ const Header = () => {
         <div className={`md:hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 shadow-xl transition-all duration-300 overflow-hidden ${isMobileMenuOpen ? 'max-h-[500px] py-4' : 'max-h-0'}`}>
           <div className="px-4 space-y-4">
             <form onSubmit={handleSearch} className="relative">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm kiếm..." 
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500" 
+                placeholder="Tìm kiếm..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500"
               />
               <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                 <FiSearch className="text-xl" />
@@ -214,13 +219,13 @@ const Header = () => {
             </form>
             <div className="flex flex-col gap-2">
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="p-3 text-slate-700 font-bold hover:bg-slate-50 rounded-xl">Trang chủ</Link>
-              
+
               <div className="p-3 bg-slate-50 rounded-xl">
                 <Link to="/products" onClick={() => setIsMobileMenuOpen(false)} className="font-bold text-slate-800 block mb-2">Sản phẩm</Link>
                 <div className="pl-4 border-l-2 border-slate-200 space-y-2">
                   {categories.map(cat => (
-                    <Link 
-                      key={cat.categoryId || cat.id} 
+                    <Link
+                      key={cat.categoryId || cat.id}
                       to={`/products?category=${cat.categoryId || cat.id}`}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="block text-sm text-slate-600 py-1"
@@ -232,7 +237,7 @@ const Header = () => {
               </div>
 
               <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="p-3 text-slate-700 font-bold hover:bg-slate-50 rounded-xl">Liên hệ</Link>
-              
+
               {!username && (
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="p-3 text-center bg-blue-600 text-white font-bold rounded-xl mt-2">
                   Đăng nhập / Đăng ký
@@ -253,13 +258,13 @@ const Header = () => {
             <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Đăng xuất?</h3>
             <p className="text-center text-slate-500 mb-8">Bạn có chắc chắn muốn rời khỏi hệ thống SaboTech không?</p>
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={() => setShowLogoutModal(false)}
                 className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
               >
                 Hủy
               </button>
-              <button 
+              <button
                 onClick={executeLogout}
                 className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30"
               >

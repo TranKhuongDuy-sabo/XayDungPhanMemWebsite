@@ -355,7 +355,16 @@ const ProductManager = () => {
                                             <img src={p.image || p.imageUrl || 'https://via.placeholder.com/50'} className="w-14 h-14 object-cover rounded-xl border border-slate-200 shadow-sm bg-white" alt="product" onError={(e) => e.target.src = 'https://via.placeholder.com/50'} />
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-slate-800 text-sm line-clamp-1">{p.productName || p.name}</span>
-                                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">ID: {actualId}</span>
+
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">ID: {actualId}</span>
+
+                                                    {p.categoryIsActive === false && (
+                                                        <span className="bg-red-50 text-red-600 text-[8px] px-2 py-0.5 rounded-md font-black uppercase border border-red-200 shadow-sm animate-pulse" title="Sản phẩm này sẽ không hiện trên web do Danh Mục đã bị tắt">
+                                                            ⚠️ Danh mục ẩn
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </td>
 
@@ -410,18 +419,18 @@ const ProductManager = () => {
                         </div>
                         <h3 className="text-2xl font-black text-slate-800 mb-2">Xác nhận xóa?</h3>
                         <p className="text-slate-500 mb-8 text-sm">
-                            Bạn sắp xóa vĩnh viễn sản phẩm <br/>
-                            <span className="font-black text-red-500 text-base">"{productToDelete.productName || productToDelete.name}"</span>. <br/>
+                            Bạn sắp xóa vĩnh viễn sản phẩm <br />
+                            <span className="font-black text-red-500 text-base">"{productToDelete.productName || productToDelete.name}"</span>. <br />
                             Hành động này không thể hoàn tác!
                         </p>
                         <div className="flex gap-4">
-                            <button 
+                            <button
                                 onClick={() => setProductToDelete(null)}
                                 className="flex-1 py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors active:scale-95"
                             >
                                 Hủy
                             </button>
-                            <button 
+                            <button
                                 onClick={executeDelete}
                                 className="flex-1 py-3.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-all shadow-lg shadow-red-500/30 active:scale-95"
                             >

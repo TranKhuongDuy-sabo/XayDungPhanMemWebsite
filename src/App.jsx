@@ -18,6 +18,7 @@ import ProductManager from './pages/ProductManager';
 import CategoryManager from './pages/CategoryManager';
 import BrandManager from './pages/BrandManager';
 import Dashboard from './pages/Dashboard'; 
+import Contact from './pages/Contact';
 
 // 🔥 Bước 1: Import trang Cart Duy vừa tạo
 import Cart from './pages/Cart'; 
@@ -36,8 +37,7 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          
-          {/* 🔥 Bước 2: Thêm đường dẫn cho giỏ hàng */}
+          <Route path="contact" element={<Contact />} />
           <Route path="cart" element={<Cart />} />
         </Route>
 
