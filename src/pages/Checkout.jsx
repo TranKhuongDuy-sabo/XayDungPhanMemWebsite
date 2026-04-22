@@ -70,7 +70,7 @@ const Checkout = () => {
             window.dispatchEvent(new Event('storage'));
 
             showToast("Đặt hàng thành công!", "success");
-            navigate('/my-orders');
+            navigate('/myorders');
 
         } catch (error) {
             showToast("Có lỗi xảy ra khi lưu đơn hàng!", "error");

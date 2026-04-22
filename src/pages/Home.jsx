@@ -4,7 +4,7 @@ import axios from 'axios';
 import { showToast } from '../components/Toast';
 import { 
     FiTruck, FiShield, FiHeadphones, FiCreditCard, 
-    FiChevronRight, FiChevronLeft, FiMonitor, FiCpu, FiMousePointer 
+    FiChevronRight, FiChevronLeft, FiMonitor, FiCpu, FiMousePointer, FiStar 
 } from 'react-icons/fi';
 
 const Home = () => {
@@ -12,6 +12,7 @@ const Home = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentBanner, setCurrentBanner] = useState(0);
+    const [pinnedReviews, setPinnedReviews] = useState([]); // State chứa review ghim
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -19,34 +20,19 @@ const Home = () => {
     // --- DATA BANNER TỰ ĐỘNG CHUYỂN ---
     const banners = [
         {
-            id: 1,
-            tag: "SaboTech Gaming Hub",
-            title: "Nâng Tầm Trải Nghiệm",
-            highlight: "Chiến Game Đỉnh Cao",
+            id: 1, tag: "SaboTech Gaming Hub", title: "Nâng Tầm Trải Nghiệm", highlight: "Chiến Game Đỉnh Cao",
             desc: "Chuyên cung cấp linh kiện PC, Laptop Gaming cho sinh viên.",
-            bg: "bg-slate-900",
-            glow: "bg-blue-600/20",
-            icon: "💻"
+            bg: "bg-slate-900", glow: "bg-blue-600/20", icon: "💻"
         },
         {
-            id: 2,
-            tag: "Sale Tới Bến",
-            title: "Gaming Gear Xịn",
-            highlight: "Giá Cực Sinh Viên",
+            id: 2, tag: "Sale Tới Bến", title: "Gaming Gear Xịn", highlight: "Giá Cực Sinh Viên",
             desc: "Bàn phím cơ, chuột gaming chuẩn E-sport giảm đến 30%.",
-            bg: "bg-indigo-900",
-            glow: "bg-purple-600/20",
-            icon: "🎧"
+            bg: "bg-indigo-900", glow: "bg-purple-600/20", icon: "🎧"
         },
         {
-            id: 3,
-            tag: "Build PC Tiết Kiệm",
-            title: "Linh Kiện Chính Hãng",
-            highlight: "Bảo Hành Tận Răng",
+            id: 3, tag: "Build PC Tiết Kiệm", title: "Linh Kiện Chính Hãng", highlight: "Bảo Hành Tận Răng",
             desc: "Hỗ trợ lắp đặt và cài Win miễn phí tại cửa hàng.",
-            bg: "bg-slate-900",
-            glow: "bg-emerald-600/20",
-            icon: "⚙️"
+            bg: "bg-slate-900", glow: "bg-emerald-600/20", icon: "⚙️"
         }
     ];
 
@@ -70,17 +56,17 @@ const Home = () => {
         }
     }, [location, navigate]);
 
-    const getCartKey = () => {
-        const username = localStorage.getItem('username');
-        return username ? `cart_${username}` : 'cart_guest';
-    };
-
+    // 🔥 CẬP NHẬT: Gộp gọi chung API Sản phẩm và API Lấy đánh giá nổi bật
     useEffect(() => {
-        const fetchFeaturedProducts = async () => {
+        const fetchData = async () => {
             try {
-                const res = await axios.get(`${API_BASE_URL}/Products`);
+                const [prodRes, revRes] = await Promise.all([
+                    axios.get(`${API_BASE_URL}/Products`),
+                    axios.get(`${API_BASE_URL}/Reviews/pinned`).catch(() => ({ data: [] })) // Lấy review ghim
+                ]);
 
-                const activeProducts = res.data.filter(p =>
+                // Xử lý Sản phẩm
+                const activeProducts = prodRes.data.filter(p =>
                     (p.isActive === true || p.isActive === "true") &&
                     (p.categoryIsActive === true || p.categoryIsActive === "true")
                 );
@@ -94,14 +80,15 @@ const Home = () => {
                 }
 
                 setProducts(featuredProducts.slice(0, 8));
+                setPinnedReviews(revRes.data || []); // Lưu mảng review vào state
 
             } catch (error) {
-                console.error("Lỗi lấy sản phẩm:", error);
+                console.error("Lỗi lấy dữ liệu:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchFeaturedProducts();
+        fetchData();
     }, []);
 
     const addToCart = (product) => {
@@ -255,7 +242,11 @@ const Home = () => {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {products.map((p) => (
-                            <div key={p.id} className="group bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
+                            <div 
+                                key={p.id} 
+                                onClick={() => navigate(`/product/${p.id}`)}
+                                className="group bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 cursor-pointer"
+                            >
                                 <div className="relative">
                                     <span className={`absolute top-2 left-2 z-10 px-2 py-1 text-white text-[10px] font-black rounded uppercase tracking-wider shadow-sm ${p.stock < 5 ? 'bg-red-500' : 'bg-blue-600'}`}>
                                         {p.stock < 5 ? 'Sắp hết' : 'Mới'}
@@ -275,7 +266,10 @@ const Home = () => {
                                         <p className="text-xl font-black text-red-600">{new Intl.NumberFormat('vi-VN').format(p.price)}đ</p>
                                     </div>
                                     <button
-                                        onClick={() => addToCart(p)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            addToCart(p);
+                                        }}
                                         className="w-full bg-slate-900 text-white py-3 mt-3 rounded-xl font-black uppercase text-sm translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-600 shadow-xl shadow-blue-600/20"
                                     >
                                         Thêm vào giỏ
@@ -290,8 +284,57 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* 🔥 KHU VỰC ĐÁNH GIÁ NỔI BẬT (CHẠY LƯỚT) VỪA ĐƯỢC CHÈN VÀO ĐÂY 🔥 */}
+            {pinnedReviews.length > 0 && (
+                <section className="mb-24 overflow-hidden relative">
+                    <style>
+                        {`
+                            @keyframes marquee {
+                                0% { transform: translateX(0); }
+                                100% { transform: translateX(-50%); } 
+                            }
+                            .animate-marquee {
+                                display: flex;
+                                width: max-content;
+                                animation: marquee 30s linear infinite;
+                            }
+                            .animate-marquee:hover {
+                                animation-play-state: paused;
+                            }
+                        `}
+                    </style>
+
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl font-black text-slate-800 tracking-tight uppercase">Khách hàng nói gì?</h2>
+                        <p className="text-slate-500 font-medium mt-2">Hàng ngàn đánh giá tích cực từ cộng đồng SaboTech</p>
+                    </div>
+
+                    <div className="relative w-full overflow-hidden flex" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
+                        <div className="animate-marquee gap-6 py-4 px-3">
+                            {[...pinnedReviews, ...pinnedReviews].map((rev, idx) => (
+                                <div key={idx} className="w-[350px] bg-white border border-slate-100 p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex-shrink-0 cursor-default hover:border-blue-200 transition-colors">
+                                    <div className="flex text-amber-400 text-sm mb-3">
+                                        {[...Array(5)].map((_, i) => <FiStar key={i} className={i < rev.rating ? 'fill-amber-400' : 'text-slate-200 fill-slate-200'} />)}
+                                    </div>
+                                    <p className="text-slate-700 font-bold text-sm mb-4 leading-relaxed line-clamp-3">"{rev.comment}"</p>
+                                    <div className="flex items-center gap-3 border-t border-slate-50 pt-4 mt-auto">
+                                        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-black uppercase shadow-inner">
+                                            {(rev.fullName || rev.username).charAt(0)}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-800 text-sm">{rev.fullName || rev.username}</p>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest line-clamp-1">Đã mua: {rev.productName}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
             {/* --- VỀ CHÚNG TÔI (ABOUT SABOTECH) --- */}
-            <section className="bg-slate-900 rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-2xl">
+            <section className="bg-slate-900 rounded-[2rem] overflow-hidden flex flex-col md:flex-row shadow-2xl mb-12">
                 <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center">
                     <span className="text-blue-500 font-black tracking-widest uppercase text-sm mb-4">Về SaboTech Store</span>
                     <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-6">
@@ -305,7 +348,6 @@ const Home = () => {
                     </Link>
                 </div>
                 <div className="md:w-1/2 bg-slate-800 relative min-h-[300px]">
-                    {/* Fake image cover using gradient for now, can be replaced with a real store image */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/50 to-transparent z-10"></div>
                     <img 
                         src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000&auto=format&fit=crop" 

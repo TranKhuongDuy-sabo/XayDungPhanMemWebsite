@@ -24,6 +24,8 @@ import MyOrders from './pages/MyOrders';
 import OrderManager from './pages/OrderManager';
 import Checkout from './pages/Checkout';
 import Cart from './pages/Cart'; 
+import ProductDetail from './pages/ProductDetail';
+import ReviewManager from './pages/ReviewManager';
 
 function App() {
   return (
@@ -44,6 +46,7 @@ function App() {
           <Route path="profile" element={<Profile/>}/>
           <Route path="myorders" element={<MyOrders/>}/>
           <Route path="checkout" element={<Checkout />} />
+          <Route path="product/:id" element={<ProductDetail />} />
         </Route>
 
         {/* ======================================= */}
@@ -58,6 +61,7 @@ function App() {
             <Route path="users" element={<UserManager />} />
             <Route path="products" element={<ProductManager />} />
             <Route path="order" element={<OrderManager />} />
+            <Route path="reviews" element={<ReviewManager />} />
           </Route>
 
         </Route>

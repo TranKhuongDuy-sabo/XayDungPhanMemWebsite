@@ -228,7 +228,11 @@ const Products = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {displayedProducts.map((product) => (
-                <div key={product.productId || product.id} className="bg-white rounded-2xl border border-slate-100 p-4 hover:shadow-2xl transition-all group flex flex-col justify-between">
+                <div 
+                  key={product.productId || product.id} 
+                  onClick={() => navigate(`/product/${product.productId || product.id}`)}
+                  className="cursor-pointer bg-white rounded-2xl border border-slate-100 p-4 hover:shadow-2xl transition-all group flex flex-col justify-between hover:-translate-y-1"
+                >
                   <div className="relative aspect-square rounded-xl bg-slate-50 overflow-hidden mb-4 flex items-center justify-center p-4">
                     <img
                       src={getImageUrl(product.image || product.imageUrl)}
@@ -255,11 +259,14 @@ const Products = () => {
                     </div>
 
                     <button
-                      onClick={() => addToCart(product)}
+                      onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(product);
+                      }}
                       disabled={product.stock <= 0}
                       className={`w-full mt-4 py-3.5 rounded-xl font-black transition-all active:scale-95 flex items-center justify-center gap-2
                                             ${product.stock > 0
-                          ? "bg-slate-900 text-white hover:bg-blue-600 shadow-lg shadow-slate-200"
+                          ? "bg-slate-900 text-white hover:bg-blue-600 shadow-lg shadow-slate-200/50"
                           : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}
                     >
                       <FiShoppingCart className="text-lg" /> {product.stock > 0 ? "THÊM VÀO GIỎ" : "LIÊN HỆ"}

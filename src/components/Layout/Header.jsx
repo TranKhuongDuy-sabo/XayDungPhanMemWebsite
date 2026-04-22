@@ -15,7 +15,7 @@ const Header = () => {
   const [categories, setCategories] = useState([]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false); 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const username = localStorage.getItem('username');
   const role = localStorage.getItem('role');
@@ -41,7 +41,7 @@ const Header = () => {
         const activeCats = res.data.filter(cat =>
           cat.isActive === true || cat.isActive === "true" || cat.isActive === "True" || cat.IsActive === true
         );
-        setCategories(activeCats); 
+        setCategories(activeCats);
       } catch (error) {
         console.error("Lỗi lấy danh mục:", error);
       }
@@ -61,7 +61,7 @@ const Header = () => {
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/products?search=${searchTerm.trim()}`);
-      setIsMobileMenuOpen(false); 
+      setIsMobileMenuOpen(false);
     }
   };
 
@@ -167,7 +167,7 @@ const Header = () => {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
                     <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50 animate-fadeIn origin-top-right">
-                      
+
                       <div className="px-5 py-3 border-b border-slate-50 mb-2 bg-slate-50/50">
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Tài khoản</p>
                         <p className="font-black text-slate-800 truncate">{username}</p>
@@ -179,20 +179,20 @@ const Header = () => {
                             <FiSettings className="text-lg" /> Trang Quản Trị
                           </Link>
                         )}
-                        
+
                         <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
                           <FiUser className="text-lg" /> Thông tin cá nhân
                         </Link>
-                        
-                        {role !== 'Admin' && (
-                          <Link to="/myorders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
-                            <FiPackage className="text-lg" /> Đơn hàng của tôi
-                          </Link>
-                        )}
+
+
+                        <Link to="/myorders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
+                          <FiPackage className="text-lg" /> Đơn hàng của tôi
+                        </Link>
+
                       </div>
 
                       <div className="border-t border-slate-100 my-2"></div>
-                      
+
                       <div className="px-2">
                         <button
                           onClick={() => {

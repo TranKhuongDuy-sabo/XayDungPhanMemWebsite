@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { showToast } from '../Toast';
 // Import bộ icon chuyên nghiệp
-import { FiPieChart, FiUsers, FiFolder, FiTag, FiMonitor, FiGlobe, FiLogOut, FiShoppingBag } from 'react-icons/fi';
+import { FiPieChart, FiUsers, FiFolder, FiTag, FiMonitor, FiGlobe, FiLogOut, FiShoppingBag, FiMessageSquare } from 'react-icons/fi';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -68,6 +68,10 @@ const AdminLayout = () => {
 
             <Link to="/admin/order" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${isActive('/admin/order')}`}>
               <FiShoppingBag className="text-lg" /> Quản lý Đơn hàng
+            </Link>
+
+            <Link to="/admin/reviews" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${isActive('/admin/reviews')}`}>
+              <FiMessageSquare className="text-lg" /> Quản lý Đánh giá
             </Link>
 
             <Link to="/admin/products" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${isActive('/admin/products')}`}>
