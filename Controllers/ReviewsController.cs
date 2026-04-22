@@ -3,97 +3,122 @@ using Microsoft.EntityFrameworkCore;
 using TechStoreApi.Data;
 using TechStoreApi.Models;
 
-namespace TechStoreApi.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class ReviewsController : ControllerBase
+namespace TechStoreApi.Controllers
 {
-    private readonly AppDbContext _context;
-
-    public ReviewsController(AppDbContext context)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ReviewsController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context;
+        public ReviewsController(AppDbContext context) { _context = context; }
 
-    // 1. LẤY TẤT CẢ ĐÁNH GIÁ CỦA MỘT SẢN PHẨM CỤ THỂ
-    // GET: /api/Reviews/product/{productId}
-    [HttpGet("product/{productId}")]
-    public async Task<ActionResult<object>> GetProductReviews(int productId)
-    {
-        // Kiểm tra sản phẩm có tồn tại không
-        var productExists = await _context.Products.AnyAsync(p => p.ProductId == productId);
-        if (!productExists) return NotFound(new { message = "Sản phẩm không tồn tại." });
-
-        var reviews = await _context.Reviews
-            .Where(r => r.ProductID == productId)
-            .Include(r => r.User) // Kết nối bảng User
-            .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new {
-                r.ReviewID,
-                r.Rating,
-                r.Comment,
-                r.CreatedAt,
-                // Ưu tiên hiện FullName, nếu không có thì hiện Username cho chuyên nghiệp
-                UserName = r.User != null 
-                    ? (!string.IsNullOrEmpty(r.User.FullName) ? r.User.FullName : r.User.Username) 
-                    : "Khách hàng SaboTech"
-            })
-            .ToListAsync();
-
-        // Tính điểm trung bình cộng (Star Rating)
-        var averageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
-
-        return Ok(new {
-            total = reviews.Count,
-            average = Math.Round(averageRating, 1),
-            data = reviews
-        });
-    }
-
-    // 2. GỬI ĐÁNH GIÁ MỚI
-    // POST: /api/Reviews
-    [HttpPost]
-    public async Task<IActionResult> PostReview(ReviewCreateDto reviewDto)
-    {
-        // Kiểm tra số sao hợp lệ
-        if (reviewDto.Rating < 1 || reviewDto.Rating > 5)
-            return BadRequest(new { message = "Số sao đánh giá phải từ 1 đến 5." });
-
-        // Kiểm tra User tồn tại (Dùng UserId theo Model của bạn)
-        var userExists = await _context.Users.AnyAsync(u => u.UserId == reviewDto.UserID);
-        if (!userExists) return BadRequest(new { message = "Người dùng không tồn tại." });
-
-        // Kiểm tra Sản phẩm tồn tại
-        var productExists = await _context.Products.AnyAsync(p => p.ProductId == reviewDto.ProductID);
-        if (!productExists) return BadRequest(new { message = "Sản phẩm không tồn tại." });
-
-        var review = new Review
+        // 1. Lấy đánh giá của 1 sản phẩm
+        [HttpGet("product/{productId}")]
+        public async Task<IActionResult> GetProductReviews(int productId)
         {
-            ProductID = reviewDto.ProductID,
-            UserID = reviewDto.UserID,
-            Rating = reviewDto.Rating,
-            Comment = reviewDto.Comment ?? string.Empty,
-            CreatedAt = DateTime.Now
-        };
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Where(r => r.ProductID == productId)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new {
+                    id = r.ReviewID,
+                    productId = r.ProductID,
+                    username = r.User.Username,
+                    fullName = r.User.FullName,
+                    rating = r.Rating,
+                    comment = r.Comment,
+                    createdAt = r.CreatedAt,
+                    isPinned = r.IsPinned
+                }).ToListAsync();
+            return Ok(reviews);
+        }
 
-        _context.Reviews.Add(review);
-        await _context.SaveChangesAsync();
+        // 2. Thêm đánh giá mới
+        [HttpPost]
+        public async Task<IActionResult> AddReview([FromBody] ReviewCreateDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
+            if (user == null) return BadRequest("Lỗi xác thực người dùng.");
 
-        return Ok(new { success = true, message = "Cảm ơn bạn đã đánh giá sản phẩm tại SaboTech!" });
-    }
+            var review = new Review {
+                ProductID = dto.ProductID,
+                UserID = user.UserId,
+                Rating = dto.Rating,
+                Comment = dto.Comment
+            };
+            _context.Reviews.Add(review);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Đã gửi đánh giá!" });
+        }
 
-    // 3. XÓA ĐÁNH GIÁ
-    // DELETE: /api/Reviews/{id}
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteReview(int id)
-    {
-        var review = await _context.Reviews.FindAsync(id);
-        if (review == null) return NotFound(new { message = "Không tìm thấy đánh giá." });
+        // 3. Xóa đánh giá (Chỉ người đăng hoặc Admin mới được xóa)
+        [HttpDelete("{id}/{username}")]
+        public async Task<IActionResult> DeleteReview(int id, string username)
+        {
+            var review = await _context.Reviews.Include(r => r.User).FirstOrDefaultAsync(r => r.ReviewID == id);
+            if (review == null) return NotFound();
 
-        _context.Reviews.Remove(review);
-        await _context.SaveChangesAsync();
+            var userReq = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (userReq == null) return BadRequest();
 
-        return Ok(new { message = "Đã xóa đánh giá thành công." });
+            // Kiểm tra nếu không phải Admin và cũng không phải chủ nhân bài review
+            if (userReq.Role != "Admin" && review.User.Username != username) {
+                return Forbid("Bạn không có quyền xóa đánh giá này.");
+            }
+
+            _context.Reviews.Remove(review);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Đã xóa đánh giá" });
+        }
+
+        // 4. API Dành cho Admin: Lấy tất cả đánh giá
+        [HttpGet("admin/all")]
+        public async Task<IActionResult> GetAllReviewsAdmin()
+        {
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new {
+                    id = r.ReviewID,
+                    productName = r.Product.ProductName,
+                    username = r.User.Username,
+                    rating = r.Rating,
+                    comment = r.Comment,
+                    createdAt = r.CreatedAt,
+                    isPinned = r.IsPinned
+                }).ToListAsync();
+            return Ok(reviews);
+        }
+
+        // 5. API Dành cho Admin: Ghim / Bỏ ghim
+        [HttpPut("admin/toggle-pin/{id}")]
+        public async Task<IActionResult> TogglePin(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review == null) return NotFound();
+            review.IsPinned = !review.IsPinned;
+            await _context.SaveChangesAsync();
+            return Ok(new { isPinned = review.IsPinned, message = review.IsPinned ? "Đã ghim!" : "Đã bỏ ghim!" });
+        }
+
+        // 6. API Trang Chủ: Lấy các đánh giá nổi bật (đã ghim)
+        [HttpGet("pinned")]
+        public async Task<IActionResult> GetPinnedReviews()
+        {
+            var reviews = await _context.Reviews
+                .Include(r => r.User).Include(r => r.Product)
+                .Where(r => r.IsPinned)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new {
+                    productName = r.Product.ProductName,
+                    productId = r.ProductID,
+                    username = r.User.Username,
+                    fullName = r.User.FullName,
+                    rating = r.Rating,
+                    comment = r.Comment
+                }).ToListAsync();
+            return Ok(reviews);
+        }
     }
 }
