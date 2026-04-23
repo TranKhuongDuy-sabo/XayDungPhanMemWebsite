@@ -192,6 +192,33 @@ public class OrdersController : ControllerBase
         return Ok(new { message = "Cập nhật trạng thái thành công!" });
     }
 
+    // ========================================================
+    // API DÀNH CHO ADMIN: Xóa đơn hàng vĩnh viễn
+    // ========================================================
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteOrder(int id)
+    {
+        // Tìm đơn hàng kèm theo các chi tiết sản phẩm bên trong nó
+        var order = await _context.Orders
+            .Include(o => o.OrderDetails)
+            .FirstOrDefaultAsync(o => o.OrderId == id);
+
+        if (order == null)
+            return NotFound("Không tìm thấy đơn hàng này!");
+
+        // 1. Xóa các chi tiết đơn hàng trước (để tránh lỗi Khóa ngoại - Foreign Key)
+        if (order.OrderDetails != null && order.OrderDetails.Any())
+        {
+            _context.OrderDetails.RemoveRange(order.OrderDetails);
+        }
+
+        // 2. Xóa đơn hàng chính
+        _context.Orders.Remove(order);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Đã xóa đơn hàng thành công!" });
+    }
+
     // Class DTO đi kèm (Dán ở cuối file OrdersController.cs)
     public class UpdateStatusDto
     {

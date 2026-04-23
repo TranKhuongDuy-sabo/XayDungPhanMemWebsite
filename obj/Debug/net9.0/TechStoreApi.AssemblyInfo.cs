@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TechStoreApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7358c464e19867980f7e493539bc38ee76e5903e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e7cdd298424b35103673040be8f1fea6d5d46be3")]
 [assembly: System.Reflection.AssemblyProductAttribute("TechStoreApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TechStoreApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
