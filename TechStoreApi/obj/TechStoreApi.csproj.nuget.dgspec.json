@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj": {}
+    "C:\\Bo\\XDPMWebBackend\\API\\XayDungPhanMemWebsite\\TechStoreApi.csproj": {}
   },
   "projects": {
-    "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj": {
+    "C:\\Bo\\XDPMWebBackend\\API\\XayDungPhanMemWebsite\\TechStoreApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj",
+        "projectUniqueName": "C:\\Bo\\XDPMWebBackend\\API\\XayDungPhanMemWebsite\\TechStoreApi.csproj",
         "projectName": "TechStoreApi",
-        "projectPath": "C:\\Bo\\XD PM Web\\TechStoreApi\\TechStoreApi.csproj",
+        "projectPath": "C:\\Bo\\XDPMWebBackend\\API\\XayDungPhanMemWebsite\\TechStoreApi.csproj",
         "packagesPath": "C:\\Users\\Kari\\.nuget\\packages\\",
-        "outputPath": "C:\\Bo\\XD PM Web\\TechStoreApi\\obj\\",
+        "outputPath": "C:\\Bo\\XDPMWebBackend\\API\\XayDungPhanMemWebsite\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,22 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.1.0, )"
+            },
+            "CloudinaryDotNet": {
+              "target": "Package",
+              "version": "[1.28.0, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.16.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[9.0.9, )"
@@ -63,6 +79,14 @@
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[9.0.2, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[7.2.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.17.0, )"
             }
           },
           "imports": [
