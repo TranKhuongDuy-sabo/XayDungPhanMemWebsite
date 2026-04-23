@@ -76,22 +76,40 @@ const ProductManager = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        
+        if (!formData.categoryId || formData.categoryId === '0' || formData.categoryId === '') {
+            return showToast("Vui lòng chọn Danh mục!", "error");
+        }
+        if (!formData.brandId || formData.brandId === '0' || formData.brandId === '') {
+            return showToast("Vui lòng chọn Thương hiệu!", "error");
+        }
 
+        // 🔥 Ép kiểu và lọc sạch mọi ký tự lạ (chữ, dấu phẩy...) chỉ giữ lại số
+        const cleanPrice = Number(String(formData.price).replace(/\D/g, ''));
+        const cleanStock = Number(String(formData.stock).replace(/\D/g, ''));
+
+        if (cleanPrice <= 0) return showToast("Giá bán phải lớn hơn 0!", "error");
+
+        setLoading(true);
         const submitData = new FormData();
         if (formData.productId) submitData.append('ProductId', formData.productId);
-        submitData.append('ProductName', formData.productName);
-        submitData.append('Price', formData.price);
-        submitData.append('Stock', formData.stock);
-        submitData.append('CategoryId', parseInt(formData.categoryId) || 0);
-        submitData.append('BrandId', parseInt(formData.brandId) || 0);
+        
+        submitData.append('ProductName', formData.productName.trim());
+        submitData.append('Price', cleanPrice);
+        submitData.append('Stock', cleanStock);
+        submitData.append('CategoryId', parseInt(formData.categoryId));
+        submitData.append('BrandId', parseInt(formData.brandId));
         submitData.append('Description', formData.description || '');
+        submitData.append('IsActive', formData.isActive);
+        submitData.append('IsFeatured', formData.isFeatured);
 
-        // Chuyển Boolean thành String để C# đọc chuẩn xác nhất
-        submitData.append('IsActive', String(formData.isActive));
-        submitData.append('IsFeatured', String(formData.isFeatured));
-
-        if (formData.imageFile) submitData.append('ImageFile', formData.imageFile);
+        // Bắt buộc gửi ảnh nếu là thêm mới
+        if (formData.imageFile) {
+            submitData.append('ImageFile', formData.imageFile);
+        } else if (!formData.productId) {
+            setLoading(false);
+            return showToast("Vui lòng chọn hình ảnh cho sản phẩm mới!", "error");
+        }
 
         try {
             if (formData.productId) {
@@ -104,7 +122,16 @@ const ProductManager = () => {
             handleResetForm();
             fetchInitialData();
         } catch (error) {
-            showToast(error.response?.data?.message || "Kiểm tra lại dữ liệu nhập!", "error");
+            // 🔥 Bắt lỗi cực mạnh: Hiển thị chính xác C# đang chê ô nào
+            let errorMsg = "Kiểm tra lại dữ liệu nhập!";
+            if (error.response?.data?.errors) {
+                const firstError = Object.values(error.response.data.errors)[0][0]; // Lấy chi tiết lỗi Validation
+                errorMsg = firstError;
+            } else if (typeof error.response?.data === 'string') {
+                errorMsg = error.response.data;
+            }
+            showToast(errorMsg, "error");
+            console.error("Lỗi gửi dữ liệu:", error.response?.data);
         } finally { setLoading(false); }
     };
 

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { showToast } from '../components/Toast';
-import { FiMessageSquare, FiTrash2, FiStar, FiBookmark } from 'react-icons/fi';
+import { FiMessageSquare, FiTrash2, FiStar, FiBookmark, FiAlertTriangle } from 'react-icons/fi';
 
 const ReviewManager = () => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [reviewToDelete, setReviewToDelete] = useState(null);
+
+    // Lấy username an toàn: Ưu tiên sessionStorage, nếu chưa có thì lấy localStorage
+    const adminUsername = sessionStorage.getItem('username') || localStorage.getItem('username');
 
     useEffect(() => {
         fetchReviews();
@@ -13,7 +17,6 @@ const ReviewManager = () => {
 
     const fetchReviews = async () => {
         try {
-            // Gọi API lấy TẤT CẢ đánh giá dành cho Admin
             const res = await axios.get('http://localhost:5164/api/Reviews/admin/all');
             setReviews(res.data);
         } catch (error) {
@@ -23,26 +26,50 @@ const ReviewManager = () => {
         }
     };
 
+    // 🔥 HÀM "MỔ BỤNG" MỌI THỂ LOẠI LỖI TỪ C# .NET CORE
+    const extractErrorMessage = (error) => {
+        console.error("Chi tiết lỗi API:", error.response); // In ra Console để dễ debug
+        if (!error.response) return "Lỗi mạng hoặc máy chủ không phản hồi!";
+        
+        const data = error.response.data;
+        if (!data) return `Lỗi thao tác (HTTP ${error.response.status})`;
+        
+        if (typeof data === 'string') return data;
+        if (data.message) return data.message;
+        if (data.title) return data.title; // Lỗi mặc định của ASP.NET
+        if (data.errors) return Object.values(data.errors)[0][0]; // Lỗi Validation
+        
+        return "Lỗi không xác định từ hệ thống!";
+    };
+
     const handleTogglePin = async (id) => {
         try {
             const res = await axios.put(`http://localhost:5164/api/Reviews/admin/toggle-pin/${id}`);
-            showToast(res.data.message, "success");
-            // Cập nhật lại UI ngay lập tức
+            showToast(res.data.message || "Đã cập nhật trạng thái ghim!", "success");
             setReviews(reviews.map(r => r.id === id ? { ...r, isPinned: res.data.isPinned } : r));
         } catch (error) {
-            showToast("Lỗi khi ghim đánh giá!", "error");
+            showToast(extractErrorMessage(error), "error");
         }
     };
 
-    const handleDelete = async (id, username) => {
-        if (!window.confirm("Bạn có chắc muốn xóa vĩnh viễn đánh giá này?")) return;
+    const executeDelete = async () => {
+        if (!reviewToDelete) return;
+        
+        if (!adminUsername) {
+            showToast("Lỗi: Không tìm thấy phiên đăng nhập Admin!", "error");
+            setReviewToDelete(null);
+            return;
+        }
+        
         try {
-            // Gọi API xóa (Admin có quyền xóa mọi bài)
-            await axios.delete(`http://localhost:5164/api/Reviews/${id}/${username}`);
-            showToast("Đã xóa đánh giá!", "success");
-            setReviews(reviews.filter(r => r.id !== id));
+            await axios.delete(`http://localhost:5164/api/Reviews/${reviewToDelete.id}/${adminUsername}`);
+            showToast("Đã xóa đánh giá thành công!", "success");
+            setReviews(reviews.filter(r => r.id !== reviewToDelete.id));
+            setReviewToDelete(null); 
         } catch (error) {
-            showToast("Lỗi khi xóa!", "error");
+            // 🔥 Hiển thị chính xác lỗi thay vì "Lỗi hệ thống"
+            showToast(extractErrorMessage(error), "error");
+            setReviewToDelete(null);
         }
     };
 
@@ -99,7 +126,7 @@ const ReviewManager = () => {
                                                     <FiBookmark className={rev.isPinned ? "fill-amber-600" : ""} />
                                                 </button>
                                                 <button 
-                                                    onClick={() => handleDelete(rev.id, rev.username)}
+                                                    onClick={() => setReviewToDelete(rev)}
                                                     className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all"
                                                     title="Xóa đánh giá"
                                                 >
@@ -114,6 +141,35 @@ const ReviewManager = () => {
                     </table>
                 </div>
             </div>
+
+            {/* MODAL XÁC NHẬN XÓA */}
+            {reviewToDelete && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center animate-slideUp">
+                        <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                            <FiAlertTriangle />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-800 mb-2">Xác nhận xóa!</h3>
+                        <p className="text-slate-500 mb-6 font-medium">
+                            Bạn có chắc muốn xóa đánh giá của khách hàng <strong className="text-slate-800">{reviewToDelete.username}</strong>? Hành động này không thể hoàn tác.
+                        </p>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={() => setReviewToDelete(null)} 
+                                className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button 
+                                onClick={executeDelete} 
+                                className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all active:scale-95"
+                            >
+                                ĐỒNG Ý XÓA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

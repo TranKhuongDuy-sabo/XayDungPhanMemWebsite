@@ -243,7 +243,7 @@ const Header = () => {
                           <FiUser className="text-lg" /> Thông tin cá nhân
                         </Link>
 
-                        <Link to="/my-orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
+                        <Link to="/myorders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 font-bold rounded-xl transition-colors">
                           <FiPackage className="text-lg" /> Đơn hàng của tôi
                         </Link>
                       </div>

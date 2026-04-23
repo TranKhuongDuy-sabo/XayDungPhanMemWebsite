@@ -3,7 +3,7 @@ import axios from 'axios';
 import { showToast } from '../components/Toast';
 import { 
     FiBox, FiEdit, FiTrash2, FiX, FiPrinter, 
-    FiUser, FiMapPin, FiPhone, FiCreditCard, FiCalendar, FiFileText
+    FiUser, FiMapPin, FiPhone, FiCreditCard, FiCalendar, FiFileText, FiAlertTriangle
 } from 'react-icons/fi';
 
 const OrderManager = () => {
@@ -12,6 +12,9 @@ const OrderManager = () => {
     
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [newStatus, setNewStatus] = useState('');
+
+    // 🔥 STATE CHO MODAL XÓA ĐƠN HÀNG
+    const [orderToDelete, setOrderToDelete] = useState(null);
 
     useEffect(() => {
         fetchOrders();
@@ -30,29 +33,51 @@ const OrderManager = () => {
         }
     };
 
+    // 🔥 HÀM "MỔ BỤNG" LỖI TỪ C# (Dùng chung cho toàn file)
+    const extractErrorMessage = (error) => {
+        console.error("Chi tiết lỗi API:", error.response); 
+        if (!error.response) return "Lỗi mạng hoặc máy chủ không phản hồi!";
+        
+        const data = error.response.data;
+        if (!data) return `Lỗi thao tác (HTTP ${error.response.status})`;
+        
+        if (typeof data === 'string') return data;
+        if (data.message) return data.message;
+        if (data.title) return data.title; 
+        if (data.errors) return Object.values(data.errors)[0][0]; 
+        
+        return "Lỗi không xác định từ hệ thống!";
+    };
+
     const handleUpdateStatus = async () => {
         if (!selectedOrder) return;
         try {
-            // Dùng đúng orderId
             await axios.put(`http://localhost:5164/api/Orders/${selectedOrder.orderId}/status`, { status: newStatus });
             showToast("Cập nhật trạng thái thành công!", "success");
             
             setOrders(orders.map(o => o.orderId === selectedOrder.orderId ? { ...o, status: newStatus } : o));
             setSelectedOrder({ ...selectedOrder, status: newStatus });
         } catch (error) {
-            showToast("Lỗi khi cập nhật trạng thái!", "error");
+            showToast(extractErrorMessage(error), "error");
         }
     };
 
-    const handleDelete = async (orderId) => {
-        if (window.confirm("Bạn có chắc muốn xóa đơn hàng này? Dữ liệu không thể phục hồi!")) {
-            try {
-                await axios.delete(`http://localhost:5164/api/Orders/${orderId}`);
-                setOrders(orders.filter(o => o.orderId !== orderId));
-                showToast("Xóa đơn hàng thành công!", "success");
-            } catch (error) {
-                showToast("Lỗi khi xóa đơn hàng!", "error");
+    // 🔥 HÀM THỰC THI XÓA ĐƠN HÀNG (KHI BẤM ĐỒNG Ý TRONG MODAL)
+    const executeDelete = async () => {
+        if (!orderToDelete) return;
+        try {
+            await axios.delete(`http://localhost:5164/api/Orders/${orderToDelete.orderId}`);
+            setOrders(orders.filter(o => o.orderId !== orderToDelete.orderId));
+            showToast(`Đã xóa đơn hàng #${orderToDelete.orderId} thành công!`, "success");
+            setOrderToDelete(null); // Đóng Modal
+        } catch (error) {
+            let errMsg = extractErrorMessage(error);
+            // Bổ sung thông báo nếu C# chặn do ràng buộc khóa ngoại
+            if (error.response?.status === 400 || error.response?.status === 500) {
+                errMsg = "Không thể xóa cứng đơn hàng đã có chi tiết sản phẩm hoặc thanh toán. Gợi ý: Hãy đổi trạng thái thành 'Đã hủy'.";
             }
+            showToast(errMsg, "error");
+            setOrderToDelete(null); // Đóng Modal
         }
     };
 
@@ -119,7 +144,8 @@ const OrderManager = () => {
                                                 <FiEdit />
                                             </button>
                                             <button 
-                                                onClick={() => handleDelete(order.orderId)}
+                                                // 🔥 MỞ MODAL XÓA THAY VÌ CONFIRM
+                                                onClick={() => setOrderToDelete(order)}
                                                 className="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all"
                                                 title="Xóa đơn hàng"
                                             >
@@ -134,7 +160,38 @@ const OrderManager = () => {
                 </div>
             </div>
 
-            {/* MODAL HÓA ĐƠN */}
+            {/* ======================================================== */}
+            {/* 🔥 MODAL XÁC NHẬN XÓA (THAY CHO ALERT MẶC ĐỊNH) 🔥 */}
+            {/* ======================================================== */}
+            {orderToDelete && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl text-center animate-slideUp">
+                        <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                            <FiAlertTriangle />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-800 mb-2">Cảnh báo xóa đơn hàng!</h3>
+                        <p className="text-slate-500 mb-6 font-medium">
+                            Bạn có chắc muốn xóa vĩnh viễn đơn hàng <strong className="text-slate-800">#{orderToDelete.orderId}</strong> của khách hàng <strong className="text-slate-800">{orderToDelete.customerName}</strong>? Hành động này không thể hoàn tác.
+                        </p>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={() => setOrderToDelete(null)} 
+                                className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button 
+                                onClick={executeDelete} 
+                                className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all active:scale-95"
+                            >
+                                ĐỒNG Ý XÓA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL HÓA ĐƠN CHI TIẾT (GIỮ NGUYÊN) */}
             {selectedOrder && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
                     <div id="printable-bill" className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative animate-slideUp">
